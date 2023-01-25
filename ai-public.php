@@ -10,93 +10,17 @@ function aipg_insert_script($query) {
         hash('sha256', $_SERVER['REMOTE_ADDR'])
     );
     $ajax_nonce = wp_create_nonce( 'aipg_store_content' );
-    ob_start();
-    ?>
-    <div id="aipg_content"></div>
-    <script type="application/javascript">//<![CDATA[
 
-async function *parseJsonStream(readableStream) {
-    const regexp = new RegExp('({.*})', 'gms');
-    for await (const line of readLines(readableStream.getReader())) {
-        let trimmedLine = line.trim().replace(/,$/, '');
-        trimmedLine = regexp.test(trimmedLine) ? trimmedLine.match(regexp)[0] : trimmedLine;
-
-        if (trimmedLine !== '[]' && trimmedLine !== '\n') {
-            try {
-                yield JSON.parse(trimmedLine);
-            } catch (e) {
-            }
-        }
-    }
-}
-
-async function *readLines(reader) {
-    const textDecoder = new TextDecoder();
-    let partOfLine = '';
-    for await (const chunk of readChunks(reader)) {
-        const chunkText = textDecoder.decode(chunk);
-        const chunkLines = chunkText.split('\n');
-        if (chunkLines.length === 1) {
-            partOfLine += chunkLines[0];
-        } else if (chunkLines.length > 1) {
-            yield partOfLine + chunkLines[0];
-            for (let i=1; i < chunkLines.length - 1; i++) {
-                yield chunkLines[i];
-            }
-            partOfLine = chunkLines[chunkLines.length - 1];
-        }
-    }
-}
-
-function readChunks(reader) {
-    return {
-        async* [Symbol.asyncIterator]() {
-            let readResult = await reader.read();
-            while (!readResult.done) {
-                yield readResult.value;
-                readResult = await reader.read();
-            }
-        },
-    };
-}
-
-function aipg_store(content, model) {
-    jQuery(function ($) {
-        $.post('<?php echo admin_url('admin-ajax.php'); ?>', {
-            'action' : 'aipg_store_content',
-            'post_id' : '<?php echo $post->ID; ?>',
-            'title' : `<?php echo $post->post_title; ?>`,
-            'content' : content,
-            'model' : model,
-            '_ajax_nonce': '<?php echo $ajax_nonce; ?>',
-        });
-    });    
-}
-
-function aipg_process() {
-    fetch('<?php echo $link; ?>')
-        .then(async (response) => {
-            let content = '';
-            for await (const chunk of this.parseJsonStream(response.body)) {
-                let model = chunk.model || '';
-                if (!Array.isArray(chunk) && !chunk.choices[0].finish_reason) {
-                    content = (content + (chunk.choices[0].text || '')).trimStart();
-                    document.getElementById("aipg_content").innerHTML = content.replace(/(\r\n|\r|\n)/g, '<br />');
-                } else {
-                    aipg_store(content, model);
-                }
-            }
-        });
-}
-
-jQuery(document).ready(function($) {
-    setTimeout(aipg_process, 100);
-});
-//]]></script>
-    <?php
-    $output = ob_get_contents();
-    ob_end_clean();
-    return $output;
+    return strtr(
+        file_get_contents(AIPG_PLUGIN_DIR.'/templates/ai-public.html'),
+        [
+            '{{ admin_url }}' => admin_url('admin-ajax.php'),
+            '{{ post_id }}' => $post->ID,
+            '{{ post_title }}' => $post->post_title,
+            '{{ ajax_nonce }}' => $ajax_nonce,
+            '{{ link }}' => $link,
+        ]
+    );    
 }
 
 function aipg_content_filter($content){  

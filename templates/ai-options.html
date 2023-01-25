@@ -1,0 +1,33 @@
+<div class="wrap">
+<h2>AI Postgen Options</h2>
+<form method="post" action="options.php">
+<input type="hidden" id="_wpnonce" name="_wpnonce" value="{{ _wpnonce }}" />
+<table class="form-table">
+    <tr valign="top">
+        <th scope="row">Plugin Enabled</th>
+        <td><select name="aipg_enabled">
+            <option value="1" {{ aipg_enabled_1 }} >Yes</option>
+            <option value="0" {{ aipg_enabled_0 }} >No</option>
+        </select></td>
+    </tr>
+    <tr valign="top">
+        <th scope="row">API Url</th>
+        <td><input type="text" name="aipg_api_url" style="width: 600px;" value="{{ aipg_api_url }}"></td>
+    </tr>
+    <tr valign="top">
+        <th scope="row">Query prefix</th>
+        <td><input type="text" name="aipg_q_prefix" style="width: 600px;" value="{{ aipg_q_prefix }}"></td>
+    </tr>
+    <tr valign="top">
+        <th scope="row">Author ID</th>
+        <td><input type="text" name="aipg_author_id" style="width: 50px;" value="{{ aipg_author_id }}"></td>
+    </tr>
+</table>
+<input type="hidden" name="action" value="update" />
+<input type="hidden" name="page_options" value="aipg_enabled,aipg_api_url,aipg_q_prefix,aipg_author_id" />
+
+<p class="submit">
+<input type="submit" name="Submit" value="{{ submit_label }}" />
+</p>
+</form>
+</div>

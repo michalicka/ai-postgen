@@ -1,0 +1,77 @@
+<table id="aipg_form" class="form-table">
+    <tr valign="top">
+        <th scope="row">ID</th>
+        <td><input id="aipg_post_id" type="text" name="post_id" style="width: 100px;" disabled></td>
+    </tr>
+    <tr valign="top">
+        <th scope="row">Title</th>
+        <td><input id="aipg_post_title" type="text" name="post_title" style="width: 600px;"></td>
+    </tr>
+    <tr valign="top">
+        <th scope="row">Content</th>
+        <td><textarea rows="30" id="aipg_post_content" name="post_content" style="width: 600px;"></textarea></td>
+    </tr>
+</table>
+<p class="submit">
+<input id="aipg_submit_button" type="button" name="Submit" value="{{ save_label }}" />
+<input id="aipg_reload_button" type="button" name="Reload" value="{{ next_label }}" />
+<input id="aipg_delete_button" type="button" name="Delete" style="float:right" value="{{ delete_label }}" />
+<img id="aipg_loader" style="height:20px;position:relative;top:4px;" src="{{ loader }}" />
+</p>
+<script type="application/javascript">//<![CDATA[
+jQuery(document).ready(function($) {
+    let aipg_post_data = null;
+
+    function aipg_toggle() {
+        $('#aipg_loader').toggle();
+    }
+
+    function aipg_load_post() {
+        $.ajax({
+            type: 'GET',
+            url: '{{ admin_url }}',
+            data: {
+                action: 'aipg_load_post',
+            },
+            success: function( data ) {
+                aipg_post_data = data;
+                if (data.id) {
+                    $('#aipg_post_id').val(data.id);
+                    $('#aipg_post_title').val(data.post_title);
+                    $('#aipg_post_content').val(data.post_excerpt);
+                    aipg_toggle();
+                } else {
+                    window.location.reload();
+                }
+            }
+        })
+    }
+
+    $( "#aipg_submit_button" ).click(function() {
+        aipg_toggle();
+        $.post('{{ admin_url }}', {
+            'action' : 'aipg_save_post',
+            'post_id' : $('#aipg_post_id').val(),
+            'title' : $('#aipg_post_title').val(),
+            'content' : $('#aipg_post_content').val(),
+            '_ajax_nonce': aipg_post_data.ajax_nonce,
+        }).then(() => aipg_load_post());
+    });
+
+    $( "#aipg_reload_button" ).click(function() {
+        aipg_toggle();
+        aipg_load_post();
+    });
+
+    $( "#aipg_delete_button" ).click(function() {
+      aipg_toggle();
+      $.post('{{ admin_url }}', {
+            'action' : 'aipg_delete_post',
+            'post_id' : $('#aipg_post_id').val(),
+            '_ajax_nonce': aipg_post_data.ajax_nonce,
+        }).then(() => aipg_load_post());
+    });
+
+    aipg_load_post();
+});
+//]]></script>
