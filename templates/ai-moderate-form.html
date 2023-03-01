@@ -37,7 +37,7 @@ jQuery(document).ready(function($) {
                 aipg_post_data = data;
                 if (data.id) {
                     $('#aipg_post_id').val(data.id);
-                    $('#aipg_post_title').val(data.post_title);
+                    $('#aipg_post_title').val(data.post_title.charAt(0).toUpperCase() + data.post_title.slice(1));
                     $('#aipg_post_content').val(data.post_excerpt);
                     aipg_toggle();
                 } else {

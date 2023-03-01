@@ -2,6 +2,8 @@
 
 A Wordpress plugin which helps you to generate post content for empty posts.
 
+Could be used with this [openai-client](https://github.com/michalicka/openai-client)
+
 ## Installation
 
 1. Download and unpack code repository to your Wordpress's `wp-content/plugins/ai-postgen/` folder.
